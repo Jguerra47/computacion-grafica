@@ -1,7 +1,7 @@
 //Medidas de la camisa
-let hips = 102/(Math.PI);
-let back = 44;
-let height = 79;
+let hips = 106/(Math.PI);
+let back = 46;
+let height = 75;
 let width = hips;
 let sleeve = back/3;
 const sleeveRad = 45 * Math.PI / 180;
@@ -37,6 +37,14 @@ function addPoints(array){
     })
 }
 
+function bezierCurve(X, Y, t){
+  let arr = []
+  for(let i = 0; i <= t; i++){
+    arr.push(...p(deCasteljau(i/t, X), deCasteljau(i/t, Y)))
+  }
+  return arr
+}
+
 const program = () => {
     const draw = linkShaders("miCanvas")
 
@@ -53,22 +61,30 @@ const program = () => {
                     ]
     addPoints(allSleeve)
 
-    const shoulder = [...p(hips/4, height)]
-    addPoints(shoulder)
-    
-    //Completar la otra mitad de la camisa haciendo 'mirror' en el eje Y
-    positions.map((_, i) =>{     
-      if (i%2 == 0) positions.push((-positions[positions.length-2-2*i]), positions[(positions.length)-1-i*2])
-    })
+    //const shoulder = [...p(hips/4, height)]
+    //addPoints(shoulder) --> Dibuja recto al solo agregar un punto
+    addPoints(bezierCurve([back/2,hips/2,hips/4],
+                          [height-5,height-2,height-3,height], 10))    
     draw(positions, matrices, erase=true)
 
+    //Completar la otra mitad de la camisa haciendo 'mirror' en el eje Y
+    const mirrored = []
+    positions.map((c, i) =>{
+      (i%2 == 0) ? mirrored.push(-c) : mirrored.push(c)
+    })
+    draw(mirrored, matrices, erase=false)    
+
     //Añadir puntos del cuello
-    let neck = []
-    const X = [hips/4, hips/8, -hips/8, (-hips/4)]
-    const Y = [height, height-10, height-10,height]
-    for(let t = 0; t <= 10; t++){
-        neck.push(...p(deCasteljau(t/10, X), deCasteljau(t/10, Y)))
-    }
+    const neck = [...bezierCurve([hips/4, hips/8, -hips/8, -hips/4],
+                              [height, height-10, height-10,height], 8),
+                ...bezierCurve([-((hips/4)+1), -hips/8, hips/8, (hips/4)+1],
+                              [height-0.3, height-11.3, height-11.3,height-0.3], 8),
+                ...p(hips/4,height),
+                ...bezierCurve([hips/4, hips/8, -hips/8, -hips/4],
+                              [height, height+1, height+1,height], 3),
+                ...bezierCurve([-((hips/4)-0.5), -hips/8, hips/8, (hips/4)-0.5],
+                              [height-1, height, height,height-1], 3)
+                  ]
     draw(neck, matrices, erase=false)
 }
 window.onload = program
@@ -98,28 +114,27 @@ document.getElementById("scaleY").addEventListener("change", (e) => {
   program();
 });
 document.getElementById("moveX").addEventListener("change", (e) => {
-  matrices.translation[0] = e.target.value/60
+  matrices.translation[0] = e.target.value/(wmax/10)
   document.getElementById("moveX-label").innerHTML = e.target.value + " cm";  
   positions = [];
   program();
 });
 document.getElementById("moveY").addEventListener("change", (e) => {
-  matrices.translation[1] = e.target.value/60
+  matrices.translation[1] = e.target.value/(hmax/10)
   document.getElementById("moveY-label").innerHTML = e.target.value + " cm";  
   positions = [];
   program();
 });
 
-
 //Medidas de la camiseta
 document.getElementById("hips").addEventListener("change", (e) => {
-    hips = e.target.value / Math.PI;
+    hips = e.target.value / (Math.PI);
     document.getElementById("hips-label").innerHTML = e.target.value + " cm";
     positions = [];
     program();
 });
 document.getElementById("width").addEventListener("change", (e) => {
-    width = e.target.value / Math.PI;
+    width = e.target.value / (Math.PI);
     document.getElementById("width-label").innerHTML = e.target.value + " cm";
     positions = [];
     program();
