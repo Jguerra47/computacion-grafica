@@ -53,7 +53,12 @@ function linkShaders(ID){
 
     gl.useProgram(app)
 
-    const draw = (positions, matrices, erase) => {
+    const figures = {
+        "TRIANGLES": gl.TRIANGLES,
+        "LINE_STRIP": gl.LINE_STRIP
+    }
+
+    const draw = (positions, matrices, erase, figure) => {
         const positionBuffer = gl.createBuffer()
         gl.bindBuffer(gl.ARRAY_BUFFER, positionBuffer)
         gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(positions), gl.STATIC_DRAW)
@@ -75,12 +80,12 @@ function linkShaders(ID){
             positionAttributeLocation,
             2,                          //Tamaño
             gl.FLOAT,                   //Tipo
-            false,
+            false,                      //Normalizar
             0,
             0           
         )
         gl.drawArrays(
-            gl.LINE_STRIP,
+            figures[figure],
             0,
             (positions.length)/2
         )
