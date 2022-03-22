@@ -4,6 +4,7 @@ let back = 46;
 let height = 75;
 let width = hips;
 let sleeve = back/3;
+let catref = 1;
 const sleeveRad = 45 * Math.PI / 180;
 
 //Limites del canvas y proporción de cambio
@@ -65,33 +66,71 @@ const program = () => {
     //addPoints(shoulder) --> Dibuja recto al solo agregar un punto
     addPoints(bezierCurve([back/2,hips/2,hips/4],
                           [height-5,height-2,height-3,height], 10))    
-    draw(positions, matrices, erase=true)
+    draw(positions, matrices, true, "LINE_STRIP")
 
     //Completar la otra mitad de la camisa haciendo 'mirror' en el eje Y
     const mirrored = []
     positions.map((c, i) =>{
       (i%2 == 0) ? mirrored.push(-c) : mirrored.push(c)
     })
-    draw(mirrored, matrices, erase=false)    
+    draw(mirrored, matrices, false, "LINE_STRIP")
 
     //Añadir puntos del cuello
     const neck = [...bezierCurve([hips/4, hips/8, -hips/8, -hips/4],
-                              [height, height-10, height-10,height], 8),
+                              [height, height-10, height-10,height], 20),
                 ...bezierCurve([-((hips/4)+1), -hips/8, hips/8, (hips/4)+1],
-                              [height-0.3, height-11.3, height-11.3,height-0.3], 8),
+                              [height-0.3, height-11.3, height-11.3,height-0.3], 20),
                 ...p(hips/4,height),
                 ...bezierCurve([hips/4, hips/8, -hips/8, -hips/4],
                               [height, height+1, height+1,height], 3),
                 ...bezierCurve([-((hips/4)-0.5), -hips/8, hips/8, (hips/4)-0.5],
                               [height-1, height, height,height-1], 3)
                   ]
-    draw(neck, matrices, erase=false)
+    draw(neck, matrices, false, "LINE_STRIP")
+
+    const cat = [ //Oreja derecha
+                ...p(-5, (height*(2/3))+0.25),
+                ...p(-3, (height*(2/3))+2.25),
+                ...p(-3, (height*(2/3))-1.75),
+                //Oreja izquierda
+                ...p(-6, (height*(2/3))+0.25),
+                ...p(-8, (height*(2/3))+2.25),
+                ...p(-8, (height*(2/3))-1.75),
+                //Cara
+                ...p(-5.5, height*(2/3)),
+                ...p(-7.5, (height*(2/3))-2), 
+                ...p(-3.5, (height*(2/3))-2),
+                ...p(-7.5, (height*(2/3))-2),
+                ...p(-3.5, (height*(2/3))-2), 
+                ...p(-5.5, (height*(2/3))-4),
+                //Pata delantera
+                ...p(-5, (height*(2/3))-4),
+                ...p(1, (height*(2/3))-3),
+                ...p(-2, (height*(2/3))-10),
+                //Torso
+                ...p(1.5, (height*(2/3))-3),
+                ...p(-0.25, (height*(2/3))-7),
+                ...p(7, (height*(2/3))-5),
+                //Pata trasera
+                ...p(5.5, (height*(2/3))-10),
+                ...p(3, (height*(2/3))-6.5),
+                ...p(7, (height*(2/3))-5.5),
+                //Cola
+                ...p(4.5, (height*(2/3))-1),
+                ...p(7, (height*(2/3))-1),
+                ...p(7, (height*(2/3))-4.5),
+                ...p(4.5, (height*(2/3))-1),
+                ...p(7, (height*(2/3))-1),
+                ...p(4.5, (height*(2/3))+2.5)
+              ]
+              
+    if(catref) draw(cat, matrices, false, "TRIANGLES")
 }
 window.onload = program
 
 //Transformaciones
 document.getElementById("rotate").addEventListener("change", (e) => {
-  const rotate = -e.target.value*Math.PI/180; //El negativo le brinda la rotación hacia la derecha
+  const rotate = e.target.value*Math.PI/180;
   document.getElementById("rotate-label").innerHTML = e.target.value+"°";
   matrices.rotation = [Math.cos(rotate), -Math.sin(rotate), 0,0,
                       Math.sin(rotate), Math.cos(rotate), 0,0,
@@ -151,4 +190,12 @@ document.getElementById("back").addEventListener("change", (e) => {
     document.getElementById("back-label").innerHTML = e.target.value + " cm";
     positions = [];
     program();
+});
+document.getElementById("catref").addEventListener("change", (e) => {
+  catref = e.target.value / 1;
+  if(catref)
+    document.getElementById("catref-label").innerHTML = "Yes"
+  else document.getElementById("catref-label").innerHTML = "No" 
+  positions = [];
+  program();
 });
