@@ -74,6 +74,7 @@ a:visited{
 
 a:hover{
     color:#2dc59f;
+    font-size: 16.5px;
 }
 
 h3{
@@ -114,14 +115,17 @@ form > div{
     margin-left: 20px;
     margin-right: 20px;    
     display: flex;
+    flex-direction: row;
     gap: 15px;
     justify-content: center;
 }
 
 form > div > div{
-    display: grid;
+    display: flex;
+    flex-direction:column;
     margin-top: 20px;
 }
+
 
 label{
     font-size: small;
